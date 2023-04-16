@@ -1,0 +1,17 @@
+# IntelliJ IDEA specific files
+.idea/
+*.iml
+*.iws
+
+# Maven build directory
+target/
+
+# Log files
+*.log
+
+# Temporary files
+*.tmp
+*.swp
+
+# System-specific files
+.DS_Store
