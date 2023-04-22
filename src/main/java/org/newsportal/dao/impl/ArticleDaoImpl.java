@@ -140,4 +140,11 @@ public class ArticleDaoImpl implements ArticleDao {
     public void deleteById(Long id) {
 
     }
+
+    public static void main(String[] args) {
+        var articleDaoImpl = new ArticleDaoImpl(ConnectionPool.getInstance());
+
+        System.out.println(articleDaoImpl.findAll());
+
+    }
 }
