@@ -5,11 +5,11 @@ import org.newsportal.dao.entity.User;
 import java.util.List;
 
 public interface UserDao {
-    List<User> findAll();
-    User findById(Long id);
     void create(User user);
-    User updateById(User user, Long id);
-    void deleteById(Long id);
+    User findById(Long id);
     User findByArticleId(Long id);
+    List<User> findAll();
+    void updateById(User user, Long id);
+    void deleteById(Long id);
     // без connection
 }
