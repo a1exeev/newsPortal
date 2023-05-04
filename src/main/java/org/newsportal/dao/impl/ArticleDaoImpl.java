@@ -2,6 +2,7 @@ package org.newsportal.dao.impl;
 
 import org.newsportal.dao.ArticleDao;
 import org.newsportal.dao.entity.Article;
+import org.newsportal.dao.entity.User;
 import org.newsportal.dao.util.ConnectionPool;
 
 import java.sql.*;
@@ -175,9 +176,51 @@ public class ArticleDaoImpl implements ArticleDao {
     }
 
     public static void main(String[] args) {
-        var articleDaoImpl = new ArticleDaoImpl(ConnectionPool.getInstance());
+        ConnectionPool connectionPool = ConnectionPool.getInstance();
 
-        System.out.println(articleDaoImpl.findAll());
+        UserDaoImpl userDaoImpl = new UserDaoImpl(connectionPool);
 
+        // Create a user
+        User user = new User();
+        user.setUsername("testuser");
+        user.setPassword("testpassword");
+
+        userDaoImpl.create(user);
+        System.out.println("Created user: " + user);
+
+        // Update the user
+        user.setUsername("updateduser");
+        userDaoImpl.updateById(user, user.getId());
+        System.out.println("Updated user: " + userDaoImpl.findById(user.getId()));
+
+        // List all users
+        System.out.println("All users: " + userDaoImpl.findAll());
+
+        ArticleDaoImpl articleDaoImpl = new ArticleDaoImpl(connectionPool);
+
+        // Create an article
+        Article article = new Article();
+        article.setTitle("Test Title");
+        article.setContent("Test Content");
+        article.setUserId(user.getId());
+
+        articleDaoImpl.create(article);
+        System.out.println("Created article: " + article);
+
+        // Update the article
+        article.setTitle("Updated Title");
+        articleDaoImpl.updateById(article, article.getId());
+        System.out.println("Updated article: " + articleDaoImpl.findById(article.getId()));
+
+        // List all articles
+        System.out.println("All articles: " + articleDaoImpl.findAll());
+
+        // Delete the article
+        articleDaoImpl.deleteById(article.getId());
+        System.out.println("Deleted article: " + articleDaoImpl.findById(article.getId()));
+
+        // Delete the user
+        userDaoImpl.deleteById(user.getId());
+        System.out.println("Deleted user: " + userDaoImpl.findById(user.getId()));
     }
 }
