@@ -18,10 +18,7 @@ public class UserDaoImpl implements UserDao {
     private static final String DELETE_BY_ID_SQL = "DELETE FROM \"user\" WHERE id = ?";
     private static final String FIND_BY_ID_SQL = "SELECT * FROM \"user\" WHERE id = ?";
     private static final String FIND_ALL_SQL = "SELECT * FROM \"user\"";
-    private static final String FIND_BY_ARTICLE_ID_SQL = "SELECT u.id, u.username, u.password " +
-            "FROM \"user\" u " +
-            "JOIN article a ON u.id = a.author_id " +
-            "WHERE a.id = ?";
+    private static final String FIND_BY_ARTICLE_ID_SQL = "SELECT u.id, u.username, u.password " + "FROM \"user\" u " + "JOIN article a ON u.id = a.author_id " + "WHERE a.id = ?";
     private final ConnectionPool connectionPool;
 
     public UserDaoImpl(ConnectionPool connectionPool) {
@@ -31,8 +28,7 @@ public class UserDaoImpl implements UserDao {
     @Override
     public void create(User user) {
         Connection connection = connectionPool.acquireConnection();
-        try (
-                PreparedStatement statement = connection.prepareStatement(CREATE_SQL, Statement.RETURN_GENERATED_KEYS)) {
+        try (PreparedStatement statement = connection.prepareStatement(CREATE_SQL, Statement.RETURN_GENERATED_KEYS)) {
 
             statement.setString(1, user.getUsername());
             statement.setString(2, user.getPassword());
@@ -62,8 +58,7 @@ public class UserDaoImpl implements UserDao {
     public User findById(Long id) {
         User user = null;
         Connection connection = connectionPool.acquireConnection();
-        try (
-             PreparedStatement statement = connection.prepareStatement(FIND_BY_ID_SQL)) {
+        try (PreparedStatement statement = connection.prepareStatement(FIND_BY_ID_SQL)) {
             statement.setLong(1, id);
             try (ResultSet resultSet = statement.executeQuery()) {
                 if (resultSet.next()) {

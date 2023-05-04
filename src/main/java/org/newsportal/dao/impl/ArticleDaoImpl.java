@@ -62,15 +62,15 @@ public class ArticleDaoImpl implements ArticleDao {
         Connection connection = connectionPool.acquireConnection();
 
         try (PreparedStatement statement = connection.prepareStatement(FIND_BY_ID_SQL)) {
-                statement.setLong(1, id);
-                ResultSet resultSet = statement.executeQuery();
-                    if (resultSet.next()) {
-                        article = new Article();
-                        article.setId(resultSet.getInt("id"));
-                        article.setTitle(resultSet.getString("title"));
-                        article.setContent(resultSet.getString("content"));
-                        article.setUserId(resultSet.getInt("user_id"));
-                    }
+            statement.setLong(1, id);
+            ResultSet resultSet = statement.executeQuery();
+            if (resultSet.next()) {
+                article = new Article();
+                article.setId(resultSet.getInt("id"));
+                article.setTitle(resultSet.getString("title"));
+                article.setContent(resultSet.getString("content"));
+                article.setUserId(resultSet.getInt("user_id"));
+            }
         } catch (SQLException e) {
             throw new RuntimeException(e);
         } finally {
@@ -108,8 +108,7 @@ public class ArticleDaoImpl implements ArticleDao {
         List<Article> articles = new ArrayList<>();
         Connection connection = connectionPool.acquireConnection();
 
-        try (PreparedStatement statement = connection.prepareStatement(FIND_ALL_SQL);
-             ResultSet resultSet = statement.executeQuery()) {
+        try (PreparedStatement statement = connection.prepareStatement(FIND_ALL_SQL); ResultSet resultSet = statement.executeQuery()) {
 
             createAndFillArticle(articles, resultSet);
         } catch (SQLException e) {
@@ -147,8 +146,7 @@ public class ArticleDaoImpl implements ArticleDao {
     @Override
     public void deleteById(Long id) {
         Connection connection = connectionPool.acquireConnection();
-        try (
-                PreparedStatement statement = connection.prepareStatement(DELETE_BY_ID_SQL)) {
+        try (PreparedStatement statement = connection.prepareStatement(DELETE_BY_ID_SQL)) {
 
             statement.setLong(1, id);
             int affectedRows = statement.executeUpdate();
