@@ -85,20 +85,13 @@ public class ArticleDaoImpl implements ArticleDao {
         List<Article> articles = new ArrayList<>();
         Connection connection = connectionPool.acquireConnection();
 
-            try {
-                PreparedStatement statement = connection.prepareStatement(FIND_BY_USER_ID_SQL);
-                statement.setLong(1, userId);
+        try {
+            PreparedStatement statement = connection.prepareStatement(FIND_BY_USER_ID_SQL);
+            statement.setLong(1, userId);
 
-                ResultSet resultSet = statement.executeQuery();
+            ResultSet resultSet = statement.executeQuery();
 
-                while (resultSet.next()) {
-                    Article article = new Article();
-                    article.setId(resultSet.getInt("id"));
-                    article.setTitle(resultSet.getString("title"));
-                    article.setContent(resultSet.getString("content"));
-                    article.setUserId(resultSet.getInt("user_id"));
-                    articles.add(article);
-                }
+            createAndFillArticle(articles, resultSet);
         } catch (SQLException e) {
             throw new RuntimeException(e);
         } finally {
@@ -111,7 +104,21 @@ public class ArticleDaoImpl implements ArticleDao {
 
     @Override
     public List<Article> findAll() {
-        return null;
+        List<Article> articles = new ArrayList<>();
+        Connection connection = connectionPool.acquireConnection();
+
+        try (PreparedStatement statement = connection.prepareStatement(FIND_ALL_SQL);
+             ResultSet resultSet = statement.executeQuery()) {
+
+            createAndFillArticle(articles, resultSet);
+        } catch (SQLException e) {
+            throw new RuntimeException(e);
+        } finally {
+            if (connection != null) {
+                connectionPool.releaseConnection(connection);
+            }
+        }
+        return articles;
     }
 
     @Override
@@ -138,7 +145,33 @@ public class ArticleDaoImpl implements ArticleDao {
 
     @Override
     public void deleteById(Long id) {
+        Connection connection = connectionPool.acquireConnection();
+        try (
+                PreparedStatement statement = connection.prepareStatement(DELETE_BY_ID_SQL)) {
 
+            statement.setLong(1, id);
+            int affectedRows = statement.executeUpdate();
+            if (affectedRows == 0) {
+                throw new SQLException("Deleting article failed, no rows affected.");
+            }
+        } catch (SQLException e) {
+            throw new RuntimeException(e);
+        } finally {
+            if (connection != null) {
+                connectionPool.releaseConnection(connection);
+            }
+        }
+    }
+
+    private void createAndFillArticle(List<Article> articles, ResultSet resultSet) throws SQLException {
+        while (resultSet.next()) {
+            Article article = new Article();
+            article.setId(resultSet.getInt("id"));
+            article.setTitle(resultSet.getString("title"));
+            article.setContent(resultSet.getString("content"));
+            article.setUserId(resultSet.getInt("user_id"));
+            articles.add(article);
+        }
     }
 
     public static void main(String[] args) {

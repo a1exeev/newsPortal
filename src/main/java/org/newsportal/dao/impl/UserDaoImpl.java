@@ -31,24 +31,24 @@ public class UserDaoImpl implements UserDao {
     @Override
     public void create(User user) {
         Connection connection = connectionPool.acquireConnection();
-
-        try (PreparedStatement statement = connection.prepareStatement(CREATE_SQL)) {
+        try (
+                PreparedStatement statement = connection.prepareStatement(CREATE_SQL, Statement.RETURN_GENERATED_KEYS)) {
 
             statement.setString(1, user.getUsername());
             statement.setString(2, user.getPassword());
 
             int affectedRows = statement.executeUpdate();
             if (affectedRows == 0) {
-                    throw new SQLException("Creating user failed, no rows affected.");
+                throw new SQLException("Creating user failed, no rows affected.");
             }
-//
-//            try (ResultSet generatedKeys = statement.getGeneratedKeys()) {
-//                if (generatedKeys.next()) {
-//                    user.setId(generatedKeys.getInt(1));
-//                } else {
-//                    throw new SQLException("Creating user failed, no ID obtained.");
-//                }
-//            }
+
+            try (ResultSet generatedKeys = statement.getGeneratedKeys()) {
+                if (generatedKeys.next()) {
+                    user.setId(generatedKeys.getInt(1));
+                } else {
+                    throw new SQLException("Creating user failed, no ID obtained.");
+                }
+            }
         } catch (SQLException e) {
             throw new RuntimeException(e);
         } finally {
