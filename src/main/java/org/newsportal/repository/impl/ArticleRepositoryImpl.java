@@ -6,11 +6,12 @@ import org.hibernate.Transaction;
 import org.hibernate.query.Query;
 import org.newsportal.repository.ArticleRepository;
 import org.newsportal.repository.entity.Article;
-import org.newsportal.repository.util.HibernateUtil;
+import org.springframework.stereotype.Component;
 
 import java.util.List;
 import java.util.Optional;
 
+@Component
 public class ArticleRepositoryImpl implements ArticleRepository {
     private final SessionFactory sessionFactory;
 
@@ -78,11 +79,5 @@ public class ArticleRepositoryImpl implements ArticleRepository {
             }
             transaction.commit();
         }
-    }
-
-    public static void main(String[] args) {
-        ArticleRepository articleRepository = new ArticleRepositoryImpl(HibernateUtil.getSessionFactory());
-        Optional<Article> optionalArticle = articleRepository.findById(2L);
-        Article article = optionalArticle.orElseThrow(() -> new RuntimeException("No such article"));
     }
 }

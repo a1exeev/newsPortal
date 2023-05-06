@@ -2,6 +2,7 @@
 .idea/
 *.iml
 *.iws
+.out
 
 # Maven build directory
 target/
