@@ -13,9 +13,9 @@ public interface ArticleService {
 
     ArticleDto getByTitle(String title);
 
-    void add(Article article);
+    void add(ArticleDto articleDto);
 
-    Optional<Article> changeById(Article article, Long id);
+    void changeById(Long id, ArticleDto articleDto);
 
     void removeById(Long ArticleDto);
 }

@@ -1,6 +1,7 @@
 package org.newsportal.service.mapper.impl;
 
 import org.newsportal.repository.entity.Article;
+import org.newsportal.repository.entity.User;
 import org.newsportal.service.mapper.ArticleMapper;
 import org.newsportal.service.model.ArticleDto;
 import org.newsportal.service.model.UserDto;
@@ -36,7 +37,24 @@ public class ArticleMapperImpl implements ArticleMapper {
 
     @Override
     public Article fromDto(ArticleDto source) {
-        return null;
+        if (source == null) return null;
+
+        User user = null;
+
+        if (source.getUserDto() != null) {
+            user = new User();
+            user.setId(source.getUserDto().getId());
+            user.setUsername(source.getUserDto().getUsername());
+            user.setPassword(source.getUserDto().getPassword());
+        }
+
+        final Article article = new Article();
+        article.setId(source.getId());
+        article.setTitle(source.getTitle());
+        article.setContent(source.getContent());
+        article.setUser(user);
+
+        return article;
     }
 
     @Override
@@ -56,6 +74,6 @@ public class ArticleMapperImpl implements ArticleMapper {
 
     @Override
     public List<Article> fromDto(List<ArticleDto> source) {
-        return null;
+        return source.stream().map(this::fromDto).filter(Objects::nonNull).collect(Collectors.toList());
     }
 }

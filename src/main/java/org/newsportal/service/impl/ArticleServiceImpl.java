@@ -9,7 +9,6 @@ import org.springframework.stereotype.Service;
 
 import java.util.List;
 import java.util.NoSuchElementException;
-import java.util.Optional;
 
 @Service
 public class ArticleServiceImpl implements ArticleService {
@@ -32,26 +31,32 @@ public class ArticleServiceImpl implements ArticleService {
 
     @Override
     public ArticleDto getById(Long id) {
-        return null;
+        return articleMapper.fromEntity(articleRepository.findById(id)
+                .orElseThrow(() -> new NoSuchElementException("No article with id " + id))
+        );
     }
 
     @Override
     public ArticleDto getByTitle(String title) {
-        return null;
+        return articleMapper.fromEntity(articleRepository.findByTitle(title)
+                .orElseThrow(() -> new NoSuchElementException("No article with title " + title))
+        );
     }
 
     @Override
-    public void add(Article article) {
-
+    public void add(ArticleDto articleDto) {
+        articleRepository.create(articleMapper.fromDto(articleDto));
     }
 
     @Override
-    public Optional<Article> changeById(Article article, Long id) {
-        return Optional.empty();
+    public void changeById(Long id, ArticleDto articleDto) {
+        Article article = articleMapper.fromDto(articleDto);
+        articleRepository.updateById(article, id)
+                .orElseThrow(() -> new NoSuchElementException("No article to update with id " + id));
     }
 
     @Override
-    public void removeById(Long ArticleDto) {
-
+    public void removeById(Long id) {
+        articleRepository.deleteById(id);
     }
 }
