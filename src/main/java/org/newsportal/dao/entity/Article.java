@@ -10,8 +10,8 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 @Builder
 public class Article {
-    private int id;
+    private long id;
     private String title;
     private String content;
-    private int userId;
+    private long userId;
 }

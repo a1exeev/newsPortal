@@ -2,6 +2,7 @@ package org.newsportal.dao.impl;
 
 import org.newsportal.dao.ArticleDao;
 import org.newsportal.dao.entity.Article;
+import org.newsportal.dao.entity.User;
 import org.newsportal.dao.util.ConnectionPool;
 
 import java.sql.*;
@@ -85,20 +86,13 @@ public class ArticleDaoImpl implements ArticleDao {
         List<Article> articles = new ArrayList<>();
         Connection connection = connectionPool.acquireConnection();
 
-            try {
-                PreparedStatement statement = connection.prepareStatement(FIND_BY_USER_ID_SQL);
-                statement.setLong(1, userId);
+        try {
+            PreparedStatement statement = connection.prepareStatement(FIND_BY_USER_ID_SQL);
+            statement.setLong(1, userId);
 
-                ResultSet resultSet = statement.executeQuery();
+            ResultSet resultSet = statement.executeQuery();
 
-                while (resultSet.next()) {
-                    Article article = new Article();
-                    article.setId(resultSet.getInt("id"));
-                    article.setTitle(resultSet.getString("title"));
-                    article.setContent(resultSet.getString("content"));
-                    article.setUserId(resultSet.getInt("user_id"));
-                    articles.add(article);
-                }
+            createAndFillArticle(articles, resultSet);
         } catch (SQLException e) {
             throw new RuntimeException(e);
         } finally {
@@ -111,7 +105,21 @@ public class ArticleDaoImpl implements ArticleDao {
 
     @Override
     public List<Article> findAll() {
-        return null;
+        List<Article> articles = new ArrayList<>();
+        Connection connection = connectionPool.acquireConnection();
+
+        try (PreparedStatement statement = connection.prepareStatement(FIND_ALL_SQL);
+             ResultSet resultSet = statement.executeQuery()) {
+
+            createAndFillArticle(articles, resultSet);
+        } catch (SQLException e) {
+            throw new RuntimeException(e);
+        } finally {
+            if (connection != null) {
+                connectionPool.releaseConnection(connection);
+            }
+        }
+        return articles;
     }
 
     @Override
@@ -138,13 +146,81 @@ public class ArticleDaoImpl implements ArticleDao {
 
     @Override
     public void deleteById(Long id) {
+        Connection connection = connectionPool.acquireConnection();
+        try (
+                PreparedStatement statement = connection.prepareStatement(DELETE_BY_ID_SQL)) {
 
+            statement.setLong(1, id);
+            int affectedRows = statement.executeUpdate();
+            if (affectedRows == 0) {
+                throw new SQLException("Deleting article failed, no rows affected.");
+            }
+        } catch (SQLException e) {
+            throw new RuntimeException(e);
+        } finally {
+            if (connection != null) {
+                connectionPool.releaseConnection(connection);
+            }
+        }
+    }
+
+    private void createAndFillArticle(List<Article> articles, ResultSet resultSet) throws SQLException {
+        while (resultSet.next()) {
+            Article article = new Article();
+            article.setId(resultSet.getInt("id"));
+            article.setTitle(resultSet.getString("title"));
+            article.setContent(resultSet.getString("content"));
+            article.setUserId(resultSet.getInt("user_id"));
+            articles.add(article);
+        }
     }
 
     public static void main(String[] args) {
-        var articleDaoImpl = new ArticleDaoImpl(ConnectionPool.getInstance());
+        ConnectionPool connectionPool = ConnectionPool.getInstance();
 
-        System.out.println(articleDaoImpl.findAll());
+        UserDaoImpl userDaoImpl = new UserDaoImpl(connectionPool);
 
+        // Create a user
+        User user = new User();
+        user.setUsername("testuser");
+        user.setPassword("testpassword");
+
+        userDaoImpl.create(user);
+        System.out.println("Created user: " + user);
+
+        // Update the user
+        user.setUsername("updateduser");
+        userDaoImpl.updateById(user, user.getId());
+        System.out.println("Updated user: " + userDaoImpl.findById(user.getId()));
+
+        // List all users
+        System.out.println("All users: " + userDaoImpl.findAll());
+
+        ArticleDaoImpl articleDaoImpl = new ArticleDaoImpl(connectionPool);
+
+        // Create an article
+        Article article = new Article();
+        article.setTitle("Test Title");
+        article.setContent("Test Content");
+        article.setUserId(user.getId());
+
+        articleDaoImpl.create(article);
+        System.out.println("Created article: " + article);
+
+        // Update the article
+        article.setTitle("Updated Title");
+        articleDaoImpl.updateById(article, article.getId());
+        System.out.println("Updated article: " + articleDaoImpl.findById(article.getId()));
+
+        // List all articles
+        System.out.println("All articles: " + articleDaoImpl.findAll());
+
+        // Delete the article
+        articleDaoImpl.deleteById(article.getId());
+        System.out.println("Deleted article: " + articleDaoImpl.findById(article.getId()));
+
+        // Delete the user
+        userDaoImpl.deleteById(user.getId());
+        System.out.println("Deleted user: " + userDaoImpl.findById(user.getId()));
     }
 }
