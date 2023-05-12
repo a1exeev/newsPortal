@@ -14,7 +14,6 @@ import java.util.NoSuchElementException;
 public class ArticleServiceImpl implements ArticleService {
 
     private final ArticleMapper articleMapper;
-
     private final ArticleRepository articleRepository;
 
     public ArticleServiceImpl(ArticleMapper articleMapper, ArticleRepository articleRepository) {

@@ -5,10 +5,12 @@ import org.hibernate.SessionFactory;
 import org.hibernate.Transaction;
 import org.newsportal.repository.UserRepository;
 import org.newsportal.repository.entity.User;
+import org.springframework.stereotype.Component;
 
 import java.util.List;
 import java.util.Optional;
 
+@Component
 public class UserRepositoryImpl implements UserRepository {
     private final SessionFactory sessionFactory;
 
