@@ -16,6 +16,7 @@ import org.newsportal.service.model.ArticleDto;
 import org.newsportal.service.model.UserDto;
 
 import java.util.Collections;
+import java.util.List;
 import java.util.NoSuchElementException;
 import java.util.Optional;
 
@@ -68,9 +69,16 @@ class UserServiceImplTest {
     @Test
     void getAll() {
         when(userRepository.findAll()).thenReturn(Optional.of(Collections.singletonList(user)));
-        userService.getAll();
+        when(userMapper.fromEntity(anyList())).thenReturn(Collections.singletonList(userDto));
+
+        List <UserDto> result = userService.getAll();
+
         verify(userRepository).findAll();
         verify(userMapper).fromEntity(anyList());
+
+        assertNotNull(result);
+        assertEquals(1, result.size());
+        assertEquals(userDto, result.get(0));
     }
 
     @Test
@@ -82,6 +90,12 @@ class UserServiceImplTest {
 
     @Test
     void getById() {
+        when(userRepository.findById(21L)).thenReturn(Optional.of(user));
+
+        userService.getById(21L);
+
+        verify(userRepository).findById(21L);
+
 
     }
 
