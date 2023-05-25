@@ -21,9 +21,8 @@ import java.util.NoSuchElementException;
 import java.util.Optional;
 
 import static org.junit.jupiter.api.Assertions.*;
-import static org.mockito.ArgumentMatchers.anyList;
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.when;
+import static org.mockito.ArgumentMatchers.*;
+import static org.mockito.Mockito.*;
 
 
 @ExtendWith(MockitoExtension.class)
@@ -71,14 +70,14 @@ class UserServiceImplTest {
         when(userRepository.findAll()).thenReturn(Optional.of(Collections.singletonList(user)));
         when(userMapper.fromEntity(anyList())).thenReturn(Collections.singletonList(userDto));
 
-        List <UserDto> result = userService.getAll();
+        List <UserDto> userDtosListExpected = userService.getAll();
 
         verify(userRepository).findAll();
-        verify(userMapper).fromEntity(anyList());
+        verify(userMapper).fromEntity(anyList()); //как сделать без anyList?
 
-        assertNotNull(result);
-        assertEquals(1, result.size());
-        assertEquals(userDto, result.get(0));
+        assertNotNull(userDtosListExpected);
+        assertEquals(1, userDtosListExpected.size());
+        assertEquals(userDto, userDtosListExpected.get(0));
     }
 
     @Test
@@ -90,28 +89,75 @@ class UserServiceImplTest {
 
     @Test
     void getById() {
-        when(userRepository.findById(21L)).thenReturn(Optional.of(user));
+        when(userRepository.findById(anyLong())).thenReturn(Optional.of(user));
+        when(userMapper.fromEntity(any(User.class))).thenReturn(userDto);
 
-        userService.getById(21L);
+        UserDto userDtoExpected = userService.getById(1L);
 
-        verify(userRepository).findById(21L);
+        verify(userRepository).findById(1L);
+        verify(userMapper).fromEntity(user);
 
-
+        assertNotNull(userDtoExpected);
+        assertEquals(userDto, userDtoExpected);
     }
 
     @Test
     void getByUsername() {
+        when(userRepository.findByUsername(anyString())).thenReturn(Optional.of(user));
+        when(userMapper.fromEntity(any(User.class))).thenReturn(userDto);
+
+        UserDto userDtoExpected = userService.getByUsername("username");
+
+        verify(userRepository).findByUsername(anyString());
+        verify(userMapper).fromEntity(user);
+
+        assertNotNull(userDtoExpected);
+        assertEquals(userDto, userDtoExpected);
     }
+
 
     @Test
     void add() {
+        when(userMapper.fromDto(any(UserDto.class))).thenReturn(user);
+
+        userService.add(userDto);
+
+        verify(userMapper).fromDto(userDto);
+        verify(userRepository).create(user);
     }
 
     @Test
     void changeById() {
+        Long id = 21L;
+
+        UserDto updatedUserDto = new UserDto();
+        updatedUserDto.setId(id);
+        updatedUserDto.setUsername("newUsername");
+        updatedUserDto.setPassword("newPassword");
+
+        User user = new User();
+        user.setId(id);
+        user.setUsername("username");
+        user.setPassword("password");
+
+        when(userRepository.findById(id)).thenReturn(Optional.of(user));
+        when(userMapper.fromDto(updatedUserDto)).thenReturn(user);
+        when(userMapper.fromEntity(user)).thenReturn(updatedUserDto);
+
+        userService.changeById(id, updatedUserDto);
+
+        verify(userRepository).findById(id);
+        verify(userRepository).updateById(user, id);
+        verify(userMapper).fromDto(updatedUserDto);
+        verify(userMapper).fromEntity(user);
     }
 
     @Test
     void removeById() {
+        Long id = 1L;
+
+        userService.removeById(id);
+
+        verify(userRepository).deleteById(id);
     }
 }
