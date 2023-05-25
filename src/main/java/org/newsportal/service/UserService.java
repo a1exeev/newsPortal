@@ -11,7 +11,7 @@ public interface UserService {
 
     UserDto getByUsername(String username);
 
-    void add(UserDto userDto);
+    Long add(UserDto userDto);
 
     void changeById(Long id, UserDto userDto);
 

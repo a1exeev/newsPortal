@@ -5,6 +5,7 @@ import org.hibernate.SessionFactory;
 import org.hibernate.Transaction;
 import org.newsportal.repository.UserRepository;
 import org.newsportal.repository.entity.User;
+import org.newsportal.repository.util.HibernateUtil;
 import org.springframework.stereotype.Component;
 
 import java.util.List;
@@ -45,11 +46,12 @@ public class UserRepositoryImpl implements UserRepository {
     }
 
     @Override
-    public void create(User user) {
+    public Long create(User user) {
         try (Session session = sessionFactory.openSession()) {
             Transaction transaction = session.beginTransaction();
-            session.save(user);
+            Long id = (Long) session.save(user);
             transaction.commit();
+            return id;
         }
     }
 
@@ -79,5 +81,15 @@ public class UserRepositoryImpl implements UserRepository {
                 transaction.commit();
             }
         }
+    }
+
+    public static void main(String[] args) {
+        UserRepository userRepository = new UserRepositoryImpl(HibernateUtil.getSessionFactory());
+
+        final User user = new User();
+        user.setUsername("test");
+        user.setPassword("test");
+
+        System.out.println(userRepository.create(user));
     }
 }

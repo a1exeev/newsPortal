@@ -43,8 +43,8 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
-    public void add(UserDto userDto) {
-        userRepository.create(userMapper.fromDto(userDto));
+    public Long add(UserDto userDto) {
+        return userRepository.create(userMapper.fromDto(userDto));
     }
 
     @Override
