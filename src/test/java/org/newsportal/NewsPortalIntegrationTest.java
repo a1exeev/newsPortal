@@ -2,8 +2,8 @@ package org.newsportal;
 
 import org.hibernate.SessionFactory;
 import org.hibernate.cfg.Configuration;
-import org.junit.Assert;
 import org.junit.jupiter.api.AfterAll;
+import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 import org.newsportal.repository.ArticleRepository;
@@ -37,21 +37,15 @@ public class NewsPortalIntegrationTest {
 
     @Container
     private static final PostgreSQLContainer CONTAINER = new PostgreSQLContainer("postgres");
-
     private static ArticleRepository articleRepository;
     private static UserRepository userRepository;
-
     private static ArticleMapper articleMapper;
     private static UserMapper userMapper;
-
     private static ArticleService articleService;
     private static UserService userService;
-
     private static SessionFactory sessionFactory;
     private static Properties properties;
-
     private static UserDto userToCreate;
-
     private static ArticleDto articleToCreate;
     private static UserDto userToUpdate;
     private static ArticleDto articleToUpdate;
@@ -122,18 +116,18 @@ public class NewsPortalIntegrationTest {
             articleToCreate.setUserDto(createdUser);
             articleService.add(articleToCreate);
             ArticleDto createdArticle = articleService.getByTitle(articleToCreate.getTitle());
-            Assert.assertNotNull(createdArticle);
-            Assert.assertEquals(articleToCreate.getTitle(), createdArticle.getTitle());
-            Assert.assertEquals(articleToCreate.getContent(), createdArticle.getContent());
-            Assert.assertEquals(createdUser, createdArticle.getUserDto());
+            Assertions.assertNotNull(createdArticle);
+            assertEquals(articleToCreate.getTitle(), createdArticle.getTitle());
+            assertEquals(articleToCreate.getContent(), createdArticle.getContent());
+            assertEquals(createdUser, createdArticle.getUserDto());
 
             // Updating Article
             createdArticle.setTitle("Updated Title");
             createdArticle.setContent("Updated Content");
             articleService.changeById(createdArticle.getId(), createdArticle);
             ArticleDto updatedArticle = articleService.getByTitle(createdArticle.getTitle());
-            Assert.assertNotNull(updatedArticle);
-            Assert.assertEquals(createdArticle, updatedArticle);
+            Assertions.assertNotNull(updatedArticle);
+            assertEquals(createdArticle, updatedArticle);
 
             // Deleting Article
             articleService.removeById(updatedArticle.getId());

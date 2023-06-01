@@ -8,11 +8,8 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.newsportal.repository.UserRepository;
-import org.newsportal.repository.entity.Article;
 import org.newsportal.repository.entity.User;
-import org.newsportal.service.mapper.ArticleMapper;
 import org.newsportal.service.mapper.UserMapper;
-import org.newsportal.service.model.ArticleDto;
 import org.newsportal.service.model.UserDto;
 
 import java.util.Collections;
@@ -20,10 +17,15 @@ import java.util.List;
 import java.util.NoSuchElementException;
 import java.util.Optional;
 
-import static org.junit.jupiter.api.Assertions.*;
-import static org.mockito.ArgumentMatchers.*;
-import static org.mockito.Mockito.*;
-
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyList;
+import static org.mockito.ArgumentMatchers.anyLong;
+import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
 class UserServiceImplTest {
@@ -35,10 +37,7 @@ class UserServiceImplTest {
     private UserMapper userMapper;
 
     private static UserDto userDto;
-    private static ArticleDto articleDto;
-
     private static User user;
-    private static Article article;
 
     @BeforeAll
     static void init() {
@@ -47,22 +46,10 @@ class UserServiceImplTest {
         userDto.setUsername("username");
         userDto.setPassword("password");
 
-        articleDto = new ArticleDto();
-        articleDto.setId(22L);
-        articleDto.setTitle("title");
-        articleDto.setContent("content");
-        articleDto.setUserDto(userDto);
-
         user = new User();
         user.setId(21L);
         user.setUsername("username");
         user.setPassword("password");
-
-        article = new Article();
-        article.setId(22L);
-        article.setTitle("title");
-        article.setContent("content");
-        article.setUser(user);
     }
 
     @Test
@@ -70,14 +57,14 @@ class UserServiceImplTest {
         when(userRepository.findAll()).thenReturn(Optional.of(Collections.singletonList(user)));
         when(userMapper.fromEntity(anyList())).thenReturn(Collections.singletonList(userDto));
 
-        List <UserDto> userDtosListExpected = userService.getAll();
+        List<UserDto> userDtoListExpected = userService.getAll();
 
         verify(userRepository).findAll();
         verify(userMapper).fromEntity(anyList()); //как сделать без anyList?
 
-        assertNotNull(userDtosListExpected);
-        assertEquals(1, userDtosListExpected.size());
-        assertEquals(userDto, userDtosListExpected.get(0));
+        assertNotNull(userDtoListExpected);
+        assertEquals(1, userDtoListExpected.size());
+        assertEquals(userDto, userDtoListExpected.get(0));
     }
 
     @Test
@@ -115,7 +102,6 @@ class UserServiceImplTest {
         assertEquals(userDto, userDtoExpected);
     }
 
-
     @Test
     void add() {
         when(userMapper.fromDto(any(UserDto.class))).thenReturn(user);
@@ -128,28 +114,26 @@ class UserServiceImplTest {
 
     @Test
     void changeById() {
-        Long id = 21L;
+
+        User updatedUserEntity = new User();
+        updatedUserEntity.setId(21L);
+        updatedUserEntity.setUsername("updatedPassword");
+        updatedUserEntity.setPassword("updatedPassword");
 
         UserDto updatedUserDto = new UserDto();
-        updatedUserDto.setId(id);
-        updatedUserDto.setUsername("newUsername");
-        updatedUserDto.setPassword("newPassword");
+        updatedUserDto.setId(21L);
+        updatedUserDto.setUsername("updatedUsername");
+        updatedUserDto.setPassword("updatedPassword");
 
-        User user = new User();
-        user.setId(id);
-        user.setUsername("username");
-        user.setPassword("password");
+        when(userMapper.fromDto(userDto)).thenReturn(user);
+        when(userRepository.updateById(user, 21L)).thenReturn(Optional.of(updatedUserEntity));
+        when(userMapper.fromEntity(updatedUserEntity)).thenReturn(updatedUserDto);
 
-        when(userRepository.findById(id)).thenReturn(Optional.of(user));
-        when(userMapper.fromDto(updatedUserDto)).thenReturn(user);
-        when(userMapper.fromEntity(user)).thenReturn(updatedUserDto);
+        userService.changeById(21L, userDto);
 
-        userService.changeById(id, updatedUserDto);
-
-        verify(userRepository).findById(id);
-        verify(userRepository).updateById(user, id);
-        verify(userMapper).fromDto(updatedUserDto);
-        verify(userMapper).fromEntity(user);
+        verify(userRepository).updateById(user, 21L);
+        verify(userMapper).fromDto(userDto);
+        verify(userMapper).fromEntity(updatedUserEntity);
     }
 
     @Test

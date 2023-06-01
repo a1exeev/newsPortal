@@ -13,7 +13,7 @@ public interface UserService {
 
     Long add(UserDto userDto);
 
-    void changeById(Long id, UserDto userDto);
+    UserDto changeById(Long id, UserDto userDto);
 
     void removeById(Long id);
 }

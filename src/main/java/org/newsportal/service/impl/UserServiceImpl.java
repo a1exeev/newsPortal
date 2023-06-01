@@ -48,10 +48,10 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
-    public void changeById(Long id, UserDto userDto) {
-        User user = userMapper.fromDto(userDto);
-        userRepository.updateById(user, id)
+    public UserDto changeById(Long id, UserDto userDto) {
+        User updatedUser = userRepository.updateById(userMapper.fromDto(userDto), id)
                 .orElseThrow(() -> new NoSuchElementException("No user to update with id " + id));
+        return userMapper.fromEntity(updatedUser);
     }
 
     @Override

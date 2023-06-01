@@ -48,10 +48,11 @@ public class ArticleServiceImpl implements ArticleService {
     }
 
     @Override
-    public void changeById(Long id, ArticleDto articleDto) {
+    public ArticleDto changeById(Long id, ArticleDto articleDto) {
         Article article = articleMapper.fromDto(articleDto);
-        articleRepository.updateById(article, id)
+        Article updatedArticle = articleRepository.updateById(article, id)
                 .orElseThrow(() -> new NoSuchElementException("No article to update with id " + id));
+        return articleMapper.fromEntity(updatedArticle);
     }
 
     @Override
